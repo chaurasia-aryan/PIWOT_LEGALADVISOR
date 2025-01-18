@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask PDF Analyzer</title>
+</head>
+<body>
+    <h1>PDF Analyzer</h1>
+    <form action="/analyze" method="post" enctype="multipart/form-data">
+        <label for="input_text">Input Text:</label>
+        <textarea id="input_text" name="input_text" required></textarea><br><br>
+        
+        <label for="prompt">Prompt:</label>
+        <textarea id="prompt" name="prompt" required></textarea><br><br>
+        
+        <label for="resume">Upload PDF:</label>
+        <input type="file" id="resume" name="resume" accept=".pdf" required><br><br>
+        
+        <input type="submit" value="Analyze">
+    </form>
+</body>
+</html>
