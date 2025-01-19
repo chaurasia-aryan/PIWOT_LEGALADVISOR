@@ -20,13 +20,13 @@ def remove_asterisks(d):
 # Load environment variables from a .env file
 load_dotenv()
 
-
+# Initialize Flask application
 app = Flask(__name__)
 
+# Enable CORS on the Flask app
+CORS(app)  # This will allow CORS for all routes and origins by default
 
-CORS(app)  
-
-
+# Directly set the API key here
 API_KEY = "AIzaSyDhdn1M1pUaJN9SYosF9HniF6ugtcV6Ff0"
 
 # Configure the Generative AI model with the API key
@@ -34,7 +34,7 @@ genai.configure(api_key=API_KEY)
 
 def get_gemini_response(input_text, pdf_content, prompt):
     try:
-        
+        # Use the new model 'gemini-1.5-flash'
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content([input_text, pdf_content[0], prompt])
         return response.text
@@ -54,16 +54,17 @@ def input_pdf_setup(uploaded_file):
 
         # Convert the image to bytes
         img_byte_arr = io.BytesIO()
-        img_data = pix.tobytes(output='png')  
+        img_data = pix.tobytes(output='png')  # Convert to PNG bytes
         img_byte_arr.write(img_data)
-        img_byte_arr.seek(0)  
+        img_byte_arr.seek(0)  # Reset stream position to the beginning
         img_data = img_byte_arr.getvalue()
 
         # Return base64 encoded image data
         pdf_parts = [
             {
                 "mime_type": "image/png",
-                "data": base64.b64encode(img_data).decode()  
+                "data": base64.b64encode(img_data).decode()  # Encode to base64
+            }
         ]
         return pdf_parts
     except Exception as e:
