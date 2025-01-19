@@ -1,0 +1,18 @@
+This is a sample business contract between Company A and Company B.
+
+1. **Parties Involved**: 
+   - Company A
+   - Company B
+
+2. **Effective Date**: January 1, 2023
+3. **Expiration Date**: December 31, 2023
+4. **Project Start Date**: January 15, 2023
+5. **Project Completion Date**: December 15, 2023
+6. **Payment Schedule**: 
+   - Initial Payment: $10,000 due on January 1, 2023
+   - Final Payment: $5,000 due on December 1, 2023
+7. **Renewal Terms**: The contract may be renewed for an additional year upon mutual agreement.
+8. **Governing Jurisdiction**: The laws of the State of California shall govern this contract.
+9. **Signatures**: 
+   - ______________________ (Company A)
+   - ______________________ (Company B)
