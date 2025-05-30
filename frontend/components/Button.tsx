@@ -1,26 +1,63 @@
 'use client'
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import { ButtonHTMLAttributes, forwardRef } from 'react';
+import Link from 'next/link';
 
-interface ButtonProps {
-  buttonText: string;
-  path?: string;
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  isLoading?: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({ buttonText, path }) => {
-  const router = useRouter();
-  return (
-    <div className="fixed bottom-4 right-4">
-      <button className="shadow-[0_0_0_3px_#000000_inset] px-6 py-2 bg-transparent border border-black dark:border-white dark:text-white text-black rounded-lg font-bold transform hover:-translate-y-1 transition duration-400" onClick={() => {
-        if(path){
-          router.push(`/${path}`)
-        }
-        }}>
-        {buttonText}
-      </button>
-    </div>
-  );
-};
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
+  children,
+  variant = 'primary',
+  size = 'md',
+  className = '',
+  href,
+  isLoading = false,
+  disabled,
+  ...props
+}, ref) => {
+  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:pointer-events-none';
+  
+  const variants = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    secondary: 'bg-neutral-700 text-white hover:bg-neutral-600 focus:ring-neutral-500',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+  };
 
-export default Button;
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-base',
+    lg: 'px-6 py-3 text-lg',
+  };
+
+  const buttonClasses = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`;
+
+  if (href) {
+    return (
+      <Link href={href} className={buttonClasses}>
+        {isLoading ? (
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+        ) : null}
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      ref={ref}
+      className={buttonClasses}
+      disabled={disabled || isLoading}
+      {...props}
+    >
+      {isLoading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+      ) : null}
+      {children}
+    </button>
+  );
+});

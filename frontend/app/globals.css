@@ -3,19 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 23, 23, 23;
+  --background-end-rgb: 17, 17, 17;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-neutral-800 rounded-lg shadow-lg p-6;
+  }
+
+  .input-field {
+    @apply bg-neutral-700 text-white px-4 py-2 rounded border border-neutral-600 focus:border-blue-500 focus:outline-none;
+  }
 }
