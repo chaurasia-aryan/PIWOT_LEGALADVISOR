@@ -14,7 +14,7 @@ An AI-powered contract management and analysis dashboard. Upload business contra
 ## Tech Stack
 
 - **Frontend:** Next.js, React, TypeScript, Tailwind CSS
-- **Backend:** Python, Flask, Google Gemini AI API
+- **Backend:** Python, Flask, Google Gemini AI API , TensorFlow 
 - **Other:** Axios, React Dropzone
 
 ## Getting Started
