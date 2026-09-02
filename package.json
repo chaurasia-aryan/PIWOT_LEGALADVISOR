@@ -1,0 +1,15 @@
+{
+  "name": "piwot-legal-advisor",
+  "version": "2.0.0",
+  "private": true,
+  "description": "PIWOT Legal Advisor: Local-First ML/DL Contract Intelligence Platform",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "lint": "npm --prefix frontend run lint"
+  },
+  "dependencies": {
+    "next": "15.1.5"
+  }
+}
