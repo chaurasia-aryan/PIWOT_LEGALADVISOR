@@ -3,34 +3,58 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 23, 23, 23;
-  --background-end-rgb: 17, 17, 17;
+  --ink: #141413;
+  --canvas: #faf9f5;
+  --surface-secondary: #f0eee6;
+  --surface-warm: #e3dacc;
+  --hairline: #d1cfc5;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    rgb(var(--background-start-rgb)),
-    rgb(var(--background-end-rgb))
-  );
+  color: #141413;
+  background-color: #faf9f5;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
+  /* Anthropic Button Primary: Slate Ink fill with Ivory text */
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors duration-200;
+    @apply inline-flex items-center justify-center bg-ink text-canvas font-medium px-6 py-2.5 rounded-sm hover:opacity-90 transition-opacity duration-150 disabled:opacity-50;
   }
   
+  /* Anthropic Button Secondary: Cream canvas with 1px Slate border */
   .btn-secondary {
-    @apply bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded transition-colors duration-200;
+    @apply inline-flex items-center justify-center bg-canvas text-ink font-medium px-6 py-2.5 rounded-sm border border-ink hover:bg-surface-secondary transition-colors duration-150 disabled:opacity-50;
   }
 
-  .card {
-    @apply bg-neutral-800 rounded-lg shadow-lg p-6;
+  /* Anthropic Button Tertiary: Transparent with hairline border */
+  .btn-tertiary {
+    @apply inline-flex items-center justify-center bg-transparent text-ink font-medium px-5 py-2 rounded-sm border border-hairline hover:border-ink transition-colors duration-150 disabled:opacity-50;
   }
 
+  /* Anthropic Card: 16px radius, surface secondary, 1px surface warm border, 0 box-shadow */
+  .card-cream {
+    @apply bg-surface-secondary text-ink rounded-md p-8 border border-surface-warm;
+  }
+
+  /* Anthropic Input: 8px radius, canvas background, 1px hairline border */
   .input-field {
-    @apply bg-neutral-700 text-white px-4 py-2 rounded border border-neutral-600 focus:border-blue-500 focus:outline-none;
+    @apply bg-canvas text-ink px-4 py-2.5 rounded-sm border border-hairline focus:border-ink focus:outline-none transition-colors duration-150 text-sm;
+  }
+
+  /* Anthropic Mono Eyebrow Metadata */
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-wider text-text-muted;
+  }
+
+  /* Hide scrollbars while allowing scroll */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

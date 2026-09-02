@@ -1,0 +1,91 @@
+[
+  {
+    "dataset_id": "CUAD",
+    "dataset_name": "Contract Understanding Atticus Dataset",
+    "source_url": "https://huggingface.co/datasets/atticus_project/cuad",
+    "license": "CC BY 4.0",
+    "task": "Clause Extraction & QA",
+    "labels_count": 41,
+    "sample_count": "510 contracts (13,000+ annotations)",
+    "format": "JSON / SQuAD v2",
+    "splits": {
+      "train": 418,
+      "test": 92
+    },
+    "domain": "Commercial Agreements (SEC filings)",
+    "piwot_suitability": "High — Core standard for contract clause & risk spans",
+    "limitations": "Heavy span format requires parsing into canonical clause chunks for fast flat classification."
+  },
+  {
+    "dataset_id": "LEDGAR",
+    "dataset_name": "LEDGAR Contract Provision Classification (LexGLUE)",
+    "source_url": "https://huggingface.co/datasets/lex_glue",
+    "license": "CC-BY-NC-SA 4.0",
+    "task": "Multi-class Clause Classification",
+    "labels_count": 100,
+    "sample_count": "80,000 provisions",
+    "format": "Parquet / JSON",
+    "splits": {
+      "train": 60000,
+      "dev": 10000,
+      "test": 10000
+    },
+    "domain": "SEC Contract Filings",
+    "piwot_suitability": "High — Ideal for supervised clause topic classification",
+    "limitations": "High label cardinality requires filtering to the top 12–16 primary business categories."
+  },
+  {
+    "dataset_id": "ContractNLI",
+    "dataset_name": "Contract Natural Language Inference",
+    "source_url": "https://huggingface.co/datasets/koreeda/contract_nli",
+    "license": "CC BY 4.0",
+    "task": "Contract NLI & Contradiction Detection",
+    "labels_count": 17,
+    "sample_count": "607 NDAs (14,000+ spans)",
+    "format": "JSON",
+    "splits": {
+      "train": 424,
+      "dev": 61,
+      "test": 122
+    },
+    "domain": "Non-Disclosure Agreements",
+    "piwot_suitability": "High — Evaluates contradiction & rule compliance",
+    "limitations": "Primarily focused on NDAs rather than full procurement / service agreements."
+  },
+  {
+    "dataset_id": "UNFAIR_ToS",
+    "dataset_name": "Unfair Terms of Service (LexGLUE)",
+    "source_url": "https://huggingface.co/datasets/lex_glue",
+    "license": "CC BY-SA 4.0",
+    "task": "Unfair Clause & Risk Classification",
+    "labels_count": 8,
+    "sample_count": "5,582 clauses",
+    "format": "Parquet / JSON",
+    "splits": {
+      "train": 4466,
+      "dev": 558,
+      "test": 558
+    },
+    "domain": "Online Terms of Service",
+    "piwot_suitability": "Medium — Useful for consumer/contract risk rules",
+    "limitations": "Focuses on consumer ToS rather than B2B agreements."
+  },
+  {
+    "dataset_id": "Legal_Entity_Corpus",
+    "dataset_name": "Legal NER & Contract Entities",
+    "source_url": "https://huggingface.co/datasets/legal_ner",
+    "license": "CC BY 4.0",
+    "task": "Legal Named Entity Recognition",
+    "labels_count": 6,
+    "sample_count": "12,000 sentences",
+    "format": "CoNLL / JSON",
+    "splits": {
+      "train": 9000,
+      "dev": 1500,
+      "test": 1500
+    },
+    "domain": "Legal & Business Contracts",
+    "piwot_suitability": "High — Extracts Parties, Dates, Amounts, Jurisdictions",
+    "limitations": "Best when augmented with deterministic regex parsers for ISO date and currency normalization."
+  }
+]

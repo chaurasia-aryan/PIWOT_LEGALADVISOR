@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { analyzeContract } from '@/app/services/api';
+import { analyzeContract } from '@/app/Services/api';
 
 interface FileUploaderProps {
   onUploadSuccess?: (file: File, analysis: string) => void;
@@ -10,7 +10,6 @@ interface FileUploaderProps {
 }
 
 export const FileUploader = ({ onUploadSuccess, onUploadError }: FileUploaderProps) => {
-  const [isDragging, setIsDragging] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -18,7 +17,7 @@ export const FileUploader = ({ onUploadSuccess, onUploadError }: FileUploaderPro
     if (acceptedFiles.length === 0) return;
 
     const file = acceptedFiles[0];
-    if (!file.type.includes('pdf')) {
+    if (!file.name.toLowerCase().endsWith('.pdf') && !file.type.includes('pdf')) {
       setErrorMessage('Please upload a PDF file');
       setUploadStatus('error');
       setTimeout(() => {
@@ -34,7 +33,7 @@ export const FileUploader = ({ onUploadSuccess, onUploadError }: FileUploaderPro
     try {
       const result = await analyzeContract(file, 'Analyze this contract');
       setUploadStatus('success');
-      onUploadSuccess?.(file, result.response);
+      onUploadSuccess?.(file, result.response || result.summary?.summary_sentences?.join(" ") || "Analysis completed.");
       setTimeout(() => setUploadStatus('idle'), 3000);
     } catch (error) {
       setUploadStatus('error');
@@ -55,17 +54,11 @@ export const FileUploader = ({ onUploadSuccess, onUploadError }: FileUploaderPro
     multiple: false
   });
 
-  const getStatusColor = () => {
-    switch (uploadStatus) {
-      case 'uploading':
-        return 'border-yellow-500 bg-yellow-500/10';
-      case 'success':
-        return 'border-green-500 bg-green-500/10';
-      case 'error':
-        return 'border-red-500 bg-red-500/10';
-      default:
-        return isDragActive ? 'border-blue-500 bg-blue-500/10' : 'border-neutral-600';
-    }
+  const getBorderColor = () => {
+    if (uploadStatus === 'uploading') return 'border-ink bg-surface-secondary-hover';
+    if (uploadStatus === 'success') return 'border-accent-olive bg-surface-secondary';
+    if (uploadStatus === 'error') return 'border-accent-clay bg-surface-secondary';
+    return isDragActive ? 'border-ink bg-surface-secondary-hover' : 'border-hairline hover:border-text-muted bg-surface-secondary';
   };
 
   const getStatusMessage = () => {
@@ -73,15 +66,15 @@ export const FileUploader = ({ onUploadSuccess, onUploadError }: FileUploaderPro
     
     switch (uploadStatus) {
       case 'uploading':
-        return 'Analyzing...';
+        return 'Processing multi-page contract on local CPU...';
       case 'success':
-        return 'Analysis complete!';
+        return 'Contract analysis complete!';
       case 'error':
         return 'Analysis failed. Please try again.';
       default:
         return isDragActive 
           ? 'Drop your PDF file here'
-          : 'Drag and drop a PDF file here, or click to select';
+          : 'Drag & drop your PDF file here, or click to browse';
     }
   };
 
@@ -89,16 +82,15 @@ export const FileUploader = ({ onUploadSuccess, onUploadError }: FileUploaderPro
     <div className="w-full">
       <div
         {...getRootProps()}
-        className={`w-full p-8 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 ${getStatusColor()} hover:border-blue-400 hover:bg-blue-500/5`}
-        onDragEnter={() => setIsDragging(true)}
-        onDragLeave={() => setIsDragging(false)}
+        className={`w-full p-10 border border-dashed rounded-md cursor-pointer transition-all duration-150 text-center ${getBorderColor()}`}
       >
         <input {...getInputProps()} />
-        <div className="text-center">
-          <p className="text-lg font-medium mb-2">{getStatusMessage()}</p>
-          <p className="text-sm text-neutral-400">Supported format: PDF</p>
+        <div className="space-y-2">
+          <div className="text-2xl">📄</div>
+          <p className="font-sans font-medium text-ink text-base">{getStatusMessage()}</p>
+          <p className="font-mono text-xs uppercase tracking-wider text-text-muted">Supported format: PDF • Local ML Pipeline</p>
         </div>
       </div>
     </div>
   );
-}; 
+};

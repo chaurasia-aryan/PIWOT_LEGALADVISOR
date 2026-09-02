@@ -4,9 +4,11 @@ import { ButtonHTMLAttributes, forwardRef } from 'react';
 import Link from 'next/link';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   href?: string;
+  path?: string;
+  buttonText?: string;
   isLoading?: boolean;
 }
 
@@ -16,33 +18,38 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   size = 'md',
   className = '',
   href,
+  path,
+  buttonText,
   isLoading = false,
   disabled,
   ...props
 }, ref) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:pointer-events-none';
+  const baseStyles = 'inline-flex items-center justify-center rounded-sm font-sans font-medium transition-all duration-150 focus:outline-none disabled:opacity-50 disabled:pointer-events-none';
   
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-neutral-700 text-white hover:bg-neutral-600 focus:ring-neutral-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    primary: 'bg-ink text-canvas hover:opacity-90 active:opacity-95',
+    secondary: 'bg-canvas text-ink border border-ink hover:bg-surface-secondary',
+    tertiary: 'bg-transparent text-ink border border-hairline hover:border-ink',
+    danger: 'bg-accent-clay text-canvas hover:opacity-90',
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-3.5 py-1.5 text-xs',
+    md: 'px-5 py-2.5 text-sm',
+    lg: 'px-7 py-3.5 text-base',
   };
 
   const buttonClasses = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`;
+  const targetUrl = href || path;
+  const content = children || buttonText;
 
-  if (href) {
+  if (targetUrl) {
     return (
-      <Link href={href} className={buttonClasses}>
+      <Link href={targetUrl} className={buttonClasses}>
         {isLoading ? (
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+          <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-current mr-2" />
         ) : null}
-        {children}
+        {content}
       </Link>
     );
   }
@@ -55,9 +62,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       {...props}
     >
       {isLoading ? (
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+        <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-current mr-2" />
       ) : null}
       {children}
     </button>
   );
 });
+
+Button.displayName = 'Button';
+
+export default Button;

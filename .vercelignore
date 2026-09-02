@@ -1,0 +1,11 @@
+.venv
+venv
+ENV
+__pycache__
+*.pyc
+.pytest_cache
+ml/models/sentence_transformers
+ml/notebooks/.ipynb_checkpoints
+.git
+tests/__pycache__
+Backend/__pycache__

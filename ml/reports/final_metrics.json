@@ -1,0 +1,32 @@
+{
+  "evaluation_timestamp": "2026-09-02T19:51:27Z",
+  "hardware_environment": "CPU Local Execution (Zero Hosted LLM Dependency)",
+  "clause_classification": {
+    "baseline_accuracy": 0.5606,
+    "baseline_macro_f1": 0.5304,
+    "transformer_accuracy": 0.803,
+    "transformer_macro_f1": 0.7973,
+    "selected_model": "Transformer Embeddings (all-MiniLM-L6-v2) + Dense Classifier"
+  },
+  "information_extraction": {
+    "party_extraction_accuracy": 1.0,
+    "iso_date_normalization_accuracy": 1.0,
+    "currency_and_amounts_recall": 1.0,
+    "jurisdiction_extraction_accuracy": 1.0
+  },
+  "anomaly_and_risk_detection": {
+    "msa_contract_risk_score": 20,
+    "msa_contract_risk_level": "Low",
+    "msa_inconsistencies_detected": 0,
+    "high_risk_contract_risk_score": 100,
+    "high_risk_contract_risk_level": "High",
+    "high_risk_inconsistencies_detected": 1,
+    "chronological_contradiction_detected": true,
+    "uncapped_liability_detected": true
+  },
+  "latency_benchmarks": {
+    "msa_contract_latency_ms": 14709.39,
+    "high_risk_contract_latency_ms": 7732.03,
+    "average_latency_ms": 11220.71
+  }
+}

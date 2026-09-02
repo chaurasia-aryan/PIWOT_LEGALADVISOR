@@ -1,57 +1,69 @@
 import axios from 'axios';
-import { ContractAnalysis } from '../types';
+import { MLContractAnalysis } from '../types';
 
-const API_BASE_URL = 'http://localhost:5000';
+// Default to NEXT_PUBLIC_API_URL if specified, otherwise relative path for Vercel Serverless
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || '';
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+};
 
-export const analyzeContract = async (file: File, inputText: string): Promise<ContractAnalysis> => {
+const apiClient = axios.create({
+  baseURL: getBaseUrl(),
+  timeout: 45000,
+});
+
+export const checkBackendHealth = async (): Promise<boolean> => {
   try {
-    const formData = new FormData();
-    formData.append('resume', file);
-    formData.append('input_text', inputText);
+    const res = await apiClient.get('/api/health');
+    return res.status === 200 && res.data.status === 'healthy';
+  } catch {
+    // Fallback check to relative /api/health
+    try {
+      const fallbackRes = await axios.get('/api/health');
+      return fallbackRes.status === 200 && fallbackRes.data.status === 'healthy';
+    } catch {
+      return false;
+    }
+  }
+};
 
-    const response = await axios.post(`${API_BASE_URL}/analyze`, formData, {
+export const analyzeContract = async (
+  file: File,
+  inputText: string = 'Full multi-page contract review'
+): Promise<MLContractAnalysis> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('resume', file); // legacy compatibility
+  formData.append('input_text', inputText);
+
+  try {
+    // Primary attempt
+    const response = await apiClient.post<MLContractAnalysis>('/api/analyze', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
 
     return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Failed to analyze contract');
+  } catch (primaryError) {
+    // If primary failed (e.g. remote backend offline), fallback to local /api/analyze route
+    try {
+      const fallbackRes = await axios.post<MLContractAnalysis>('/api/analyze', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return fallbackRes.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message;
+        throw new Error(errorMsg || 'Failed to analyze contract');
+      }
+      throw new Error(
+        primaryError instanceof Error ? primaryError.message : 'An unexpected error occurred during contract analysis.'
+      );
     }
-    throw new Error('Failed to analyze contract');
   }
 };
-
-export const getContracts = async (): Promise<Contract[]> => {
-  try {
-    const response = await api.get<Contract[]>('/contracts');
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch contracts');
-    }
-    throw new Error('Failed to fetch contracts');
-  }
-};
-
-export const uploadContract = async (file: File): Promise<FileUploadResponse> => {
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await api.post<FileUploadResponse>('/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Failed to upload contract');
-    }
-    throw new Error('Failed to upload contract');
-  }
-}; 

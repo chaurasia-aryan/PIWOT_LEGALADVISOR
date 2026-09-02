@@ -1,102 +1,61 @@
-from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS  
-from dotenv import load_dotenv
-import base64
-import io
-import fitz  
-import google.generativeai as genai
-import os
-
-def remove_asterisks(d):
-    if isinstance(d, dict):
-        return {k: remove_asterisks(v) for k, v in d.items()}
-    elif isinstance(d, list):
-        return [remove_asterisks(i) for i in d]
-    elif isinstance(d, str):
-        return d.replace('*', '')
-    else:
-        return d
-
-# Load environment variables from a .env file
-load_dotenv()
-
-# Initialize Flask application
-app = Flask(__name__)
-
-# Enable CORS on the Flask app
-CORS(app)  # This will allow CORS for all routes and origins by default
-
-# Directly set the API key here
-API_KEY = "AIzaSyDhdn1M1pUaJN9SYosF9HniF6ugtcV6Ff0"
-
-# Configure the Generative AI model with the API key
-genai.configure(api_key=API_KEY)
-
-# Predefined detailed prompt
-DETAILED_PROMPT = """
-You are an advanced AI-powered PDF analyzer specializing in the review and analysis of business contracts. Your primary purpose is to assist in understanding and evaluating contractual agreements between two businesses. Your task involves the following: Legal Compliance Check: Thoroughly analyze the contract to determine if it is legally valid and correct. Identify any inconsistencies, missing elements, or potential legal flaws that might render the contract unenforceable or problematic. Summarization of Terms and Conditions: Read through the entire document and distill the essential terms and conditions into a concise summary of no more than six lines. Ensure the summary captures the core agreement, obligations, rights, and responsibilities of both parties. Extraction of Key Metadata: Identify and extract all critical metadata from the contract. This includes but is not limited to the expiration date of the contract, the project start and completion dates, renewal terms (if applicable), payment schedules, governing jurisdiction, and any other significant deadlines or milestones mentioned. Your responses should be accurate, clear, and actionable, ensuring businesses can quickly grasp the key points and legal standing of the contract without needing to review the full document.
+"""
+PIWOT Legal Advisor — Flask Application Entrypoint
+Serves local ML/DL legal contract analysis endpoints with full multi-page PDF processing.
 """
 
-def get_gemini_response(input_text, pdf_content, prompt=DETAILED_PROMPT):
-    try:
-        # Use the new model 'gemini-1.5-flash'
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content([input_text, pdf_content[0], prompt])
-        return response.text
-    except Exception as e:
-        return str(e)
+import os
+from flask import Flask, jsonify, render_template
+from flask_cors import CORS
+from dotenv import load_dotenv
 
-def input_pdf_setup(uploaded_file):
-    try:
-        # Open the PDF file with PyMuPDF
-        pdf_document = fitz.open(stream=uploaded_file.read(), filetype='pdf')
-        if pdf_document.page_count == 0:
-            raise ValueError("No pages found in the PDF file")
+# Load environment variables
+load_dotenv()
 
-        # Process the first page
-        page = pdf_document.load_page(0)
-        pix = page.get_pixmap()
+def create_app() -> Flask:
+    app = Flask(__name__)
+    
+    # Configure CORS for all origins
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
-        # Convert the image to bytes
-        img_byte_arr = io.BytesIO()
-        img_data = pix.tobytes(output='png')  # Convert to PNG bytes
-        img_byte_arr.write(img_data)
-        img_byte_arr.seek(0)  # Reset stream position to the beginning
-        img_data = img_byte_arr.getvalue()
+    # Maximum upload size: 16 MB
+    app.config["MAX_CONTENT_LENGTH"] = int(os.getenv("MAX_CONTENT_LENGTH", 16 * 1024 * 1024))
 
-        # Return base64 encoded image data
-        pdf_parts = [
-            {
-                "mime_type": "image/png",
-                "data": base64.b64encode(img_data).decode()  # Encode to base64
+    # Register blueprints
+    from routes.analysis_routes import analysis_bp
+    app.register_blueprint(analysis_bp)
+
+    @app.route("/")
+    def index():
+        return jsonify({
+            "service": "PIWOT Legal Advisor ML/DL Backend",
+            "version": "2.0.0",
+            "status": "online",
+            "endpoints": {
+                "health": "/api/health",
+                "models": "/api/models",
+                "analyze": "POST /api/analyze"
             }
-        ]
-        return pdf_parts
-    except Exception as e:
-        raise ValueError(f"Error processing PDF file: {e}")
+        })
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        return jsonify({"error": "Uploaded file exceeds the 16MB maximum file size limit."}), 413
 
-@app.route('/analyze', methods=['POST'])
-def analyze():
-    try:
-        input_text = request.form['input_text']
-        file = request.files.get('resume')
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({"error": "Endpoint not found."}), 404
 
-       
+    @app.errorhandler(500)
+    def internal_error(error):
+        return jsonify({"error": "An internal server error occurred."}), 500
 
-        if file and file.filename.lower().endswith('.pdf'):
-            detailedPrompt = "You are an advanced AI-powered PDF analyzer specializing in the review and analysis of business contracts. Your primary purpose is to assist in understanding and evaluating contractual agreements between two businesses. Your task involves the following: Legal Compliance Check: Thoroughly analyze the contract to determine if it is legally valid and correct. Identify any inconsistencies, missing elements, or potential legal flaws that might render the contract unenforceable or problematic. Summarization of Terms and Conditions: Read through the entire document and distill the essential terms and conditions into a concise summary of no more than six lines. Ensure the summary captures the core agreement, obligations, rights, and responsibilities of both parties. Extraction of Key Metadata: Identify and extract all critical metadata from the contract. This includes but is not limited to the expiration date of the contract, the project start and completion dates, renewal terms (if applicable), payment schedules, governing jurisdiction, and any other significant deadlines or milestones mentioned. Your responses should be accurate, clear, and actionable, ensuring businesses can quickly grasp the key points and legal standing of the contract without needing to review the full document."
-            pdf_content = input_pdf_setup(file)
-            response = get_gemini_response(detailedPrompt, pdf_content)
-            response = remove_asterisks(response)
-            return jsonify({'response': response})
-        else:
-            return jsonify({'error': 'Invalid file or no file uploaded'}), 400
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return app
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+app = create_app()
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))
+    host = os.getenv("HOST", "0.0.0.0")
+    debug_mode = os.getenv("FLASK_DEBUG", "0") == "1"
+    app.run(host=host, port=port, debug=debug_mode, use_reloader=False)

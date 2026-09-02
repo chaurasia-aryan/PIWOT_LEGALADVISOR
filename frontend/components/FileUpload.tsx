@@ -1,80 +1,78 @@
 "use client";
 import React, { useState, useCallback } from "react";
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, FileRejection } from 'react-dropzone';
 
-interface FileUploaderProps {
-  onFileUpload: (file: File) => Promise<void>;
+interface FileUploadProps {
+  onFileUpload?: (file: File) => Promise<void>;
 }
 
-export const FileUploader = ({ onFileUpload }: FileUploaderProps) => {
-  const [isDragging, setIsDragging] = useState(false);
+export const FileUploader = ({ onFileUpload }: FileUploadProps) => {
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
+  const onDrop = useCallback(async (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+    const file = acceptedFiles[0] || (fileRejections && fileRejections.length > 0 ? fileRejections[0].file : null);
+    if (!file) return;
 
-    const file = acceptedFiles[0];
-    if (!file.type.includes('pdf')) {
-      alert('Please upload a PDF file');
+    if (!file.name.toLowerCase().endsWith('.pdf') && !file.type.includes('pdf')) {
+      console.warn('Please upload a PDF file');
       return;
     }
 
     setUploadStatus('uploading');
     try {
-      await onFileUpload(file);
+      if (onFileUpload) {
+        await onFileUpload(file);
+      }
       setUploadStatus('success');
       setTimeout(() => setUploadStatus('idle'), 3000);
-    } catch (error) {
+    } catch (err) {
+      console.error('File upload error:', err);
       setUploadStatus('error');
       setTimeout(() => setUploadStatus('idle'), 3000);
     }
   }, [onFileUpload]);
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'application/pdf': ['.pdf']
-    },
     multiple: false
   });
 
-  const getStatusColor = () => {
-    switch (uploadStatus) {
-      case 'uploading':
-        return 'border-yellow-500';
-      case 'success':
-        return 'border-green-500';
-      case 'error':
-        return 'border-red-500';
-      default:
-        return isDragging ? 'border-blue-500' : 'border-gray-600';
-    }
+  const getBorderColor = () => {
+    if (uploadStatus === 'uploading') return 'border-ink bg-surface-secondary-hover';
+    if (uploadStatus === 'success') return 'border-accent-olive bg-surface-secondary';
+    if (uploadStatus === 'error') return 'border-accent-clay bg-surface-secondary';
+    return isDragActive ? 'border-ink bg-surface-secondary-hover' : 'border-hairline hover:border-text-muted bg-surface-secondary';
   };
 
   const getStatusMessage = () => {
     switch (uploadStatus) {
       case 'uploading':
-        return 'Uploading...';
+        return 'Processing multi-page contract on local CPU...';
       case 'success':
-        return 'Upload successful!';
+        return 'Contract analysis complete!';
       case 'error':
-        return 'Upload failed. Please try again.';
+        return 'Analysis encountered an error. Please try again.';
       default:
-        return 'Drag and drop a PDF file here, or click to select';
+        return isDragActive
+          ? 'Drop PDF contract here'
+          : 'Drag & drop your PDF contract here, or click to browse';
     }
   };
 
   return (
     <div
       {...getRootProps()}
-      className={`w-full p-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors duration-200 ${getStatusColor()} hover:border-blue-400`}
-      onDragEnter={() => setIsDragging(true)}
-      onDragLeave={() => setIsDragging(false)}
+      className={`w-full p-10 border border-dashed rounded-md cursor-pointer transition-all duration-150 text-center ${getBorderColor()}`}
     >
       <input {...getInputProps()} />
-      <div className="text-center">
-        <p className="text-white mb-2">{getStatusMessage()}</p>
-        <p className="text-sm text-gray-400">Supported format: PDF</p>
+      <div className="space-y-2">
+        <div className="text-2xl">📄</div>
+        <p className="font-sans font-medium text-ink text-base">
+          {getStatusMessage()}
+        </p>
+        <p className="font-mono text-xs uppercase tracking-wider text-text-muted">
+          Supported Format: .PDF • Multi-Page Ingestion with OCR
+        </p>
       </div>
     </div>
   );
